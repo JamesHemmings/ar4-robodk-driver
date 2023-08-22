@@ -878,24 +878,36 @@ def RunCommand(cmd_line):
 
 def HomeRobot(ser):
     commandslist = [
-        "LLA1B0C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N4.25O10.5P0Q0R0" + "\n",
-        "LLA0B1C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N4.25O10.5P0Q0R0" + "\n",
-        "LLA0B0C1D0E0F0G0H0I0" + "J0K-3.96L0M1.334N4.25O10.5P0Q0R0" + "\n",
-        "LLA0B0C0D1E0F0G0H0I0" +"J0K-3.96L0M1.334N4.25O10.5P0Q0R0" + "\n",
-        "LLA0B0C0D0E1F0G0H0I0" +"J0K-3.96L0M1.334N4.25O10.5P0Q0R0" + "\n",
-        "LLA0B0C0D0E0F1G0H0I0" +"J0K-3.96L0M1.334N4.25O10.5P0Q0R0" + "\n"
+        "LLA1B0C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",                                                    #offset values should be parameterized sometime in the future
+        "LLA0B1C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",
+        "LLA0B0C1D0E0F0G0H0I0" + "J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",
+        "LLA0B0C0D1E0F0G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",
+        "LLA0B0C0D0E1F0G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",
+        "LLA0B0C0D0E0F1G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n"
 
     ]
 
     for joint_number, command in enumerate(commandslist):
-        ser.write(command.encode())
-        ser.flushInput()
-        response = str(ser.readline().strip(), 'utf-8')
-        if (response[:1] == 'A'):
-          message = f"J{joint_number+1} Calibrated Successfully"
-        else:
-            message = f"J{joint_number+1} Calibrated Failed"
-        print_message(message)
+        attempts = 3
+        attempts_left = attempts
+        while attempts_left > 0:
+            ser.write(command.encode())
+            ser.flushInput()
+            response = str(ser.readline().strip(), 'utf-8')
+            if response[:1] == 'A':
+                message = f"J{joint_number+1} Calibrated Successfully"
+                print_message(message)
+                break
+            else:
+                message = f"J{joint_number+1} Calibrated Failed, Retrying joint calibration, {attempts_left} attempts left"
+                print_message(message)
+            attempts_left -= 1
+        
+            if attempts_left == 0:
+                error_message = f"J{joint_number+1} calibration unsuccessful after {attempts} attempts."
+                print_message(error_message)
+                raise Exception(error_message)  # Raise an exception
+
 
 def RunMain():
     """Call Main procedure"""
