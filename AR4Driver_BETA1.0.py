@@ -204,7 +204,7 @@ def setCom2():
         global ser2
         port = "COM4"
         baud = 115200
-        ser2 = serial.Serial(port, baud)
+        ser2 = serial.Serial(port, baud,timeout = 5 )
         print("Connecting to IO port : " + port)
 
     except ConnectionRefusedError as e:
@@ -775,15 +775,45 @@ def RunCommand(cmd_line):
             UpdateStatus(ROBOTCOM_READY)
 
     elif n_cmd_values >= 2 and cmd_line.startswith("WAITDI"):
-        print_message("Waiting")
-        printer_status = print_funcs.get_print_status()
+        split_command = cmd_line.split()
+        io_pin = split_command[-2]
+        io_value = split_command[-1]
+        print_message(f"pin:{io_pin},value:{io_value}")
+        
         UpdateStatus(ROBOTCOM_WORKING)
-        while printer_status == "printing":
-            print_message("waiting for print to finish")
-            time.sleep(60)
+
+        if io_pin == "printer":                                  #if waiting for printer
             printer_status = print_funcs.get_print_status()
-        if printer_status =="complete":
-            print_funcs.send_gcode("G90\nG1 Z120 F1500")
+            if printer_status == "printing":
+                while printer_status == "printing":
+                    print_message("waiting for print to finish")
+                    time.sleep(60)
+                    printer_status = print_funcs.get_print_status()
+            if printer_status =="complete":
+                print_funcs.send_gcode("G90\nG1 Z120 F1500")
+            else:
+                print_message("printer not printing")
+        
+        if io_value == "0":                                 #wait off
+            command = F"WON{io_pin}"+"\n"
+            print_message(command)
+
+        elif io_value == "1":                               #wait on
+            command = F"WIN{io_pin}"+"\n"
+            print_message(command)
+        
+        if command:                                             #send commands to arduino io board
+            ser2.write(command.encode())
+            ser2.flushInput()
+            time.sleep(.2)
+            print_message("waiting for response")
+            response =  ser2.read()
+            
+            if response:                                       #if response before timeout 
+                print_message(f"io response succesful")
+            
+            else:
+                print_message("no response, ESTOP PLACE HOLDER MESSAGE")        #placeholder until I have estop system in place
         
         UpdateStatus(ROBOTCOM_READY)
 
