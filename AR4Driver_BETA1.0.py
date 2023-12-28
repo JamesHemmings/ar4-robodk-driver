@@ -878,12 +878,12 @@ def RunCommand(cmd_line):
 
 def HomeRobot(ser):
     commandslist = [
-        "LLA1B0C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",                                                    #offset values should be parameterized sometime in the future
-        "LLA0B1C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",
-        "LLA0B0C1D0E0F0G0H0I0" + "J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",
-        "LLA0B0C0D1E0F0G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",
-        "LLA0B0C0D0E1F0G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n",
-        "LLA0B0C0D0E0F1G0H0I0" +"J0K-3.96L0M1.334N7.25O10.5P0Q0R0" + "\n"
+        "LLA1B0C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N30.005O10.5P0Q0R0" + "\n",                                                    #offset values should be parameterized sometime in the future
+        "LLA0B1C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N30.005O10.5P0Q0R0" + "\n",
+        "LLA0B0C1D0E0F0G0H0I0" + "J0K-3.96L0M1.334N30.005O10.5P0Q0R0" + "\n",
+        "LLA0B0C0D1E0F0G0H0I0" +"J0K-3.96L0M1.334N30.005O10.5P0Q0R0" + "\n",
+        "LLA0B0C0D0E1F0G0H0I0" +"J0K-3.96L0M1.334N30.005O10.5P0Q0R0" + "\n",
+        "LLA0B0C0D0E0F1G0H0I0" +"J0K-3.96L0M1.334N30.005O10.5P0Q0R0" + "\n"
 
     ]
 
