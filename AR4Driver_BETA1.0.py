@@ -63,6 +63,7 @@ import time
 from io import BytesIO
 import serial
 import print_funcs
+from connect import connect_to_server, send_message
 ##from serial import Serial
 
 # ---------------------------------------------------------------------------------
@@ -106,10 +107,10 @@ def Robot_Disconnect():
 
     try:
         command = "CL"
-        ser.write(command.encode())
+        send_message(client_socket,command.encode())
     except:
         print ("foo")
-    ser.close()
+    # ser.close()
 
 # ----------- communication class for AR4 robots -------------
 # This class handles communication between this driver (PC) and the robot
@@ -168,26 +169,23 @@ class ComRobot:
         #sys.stdout.flush()
 
         try:
-            global ser    
-            stringport = "COM" + str(portnbr)
-            baud = 9600  
-            ser = serial.Serial(stringport,baud)
-            print("Connecting to port : " + stringport)
+            global client_socket
+            client_socket = connect_to_server()
+            # global ser    
+            # stringport = "COM" + str(portnbr)
+            # baud = 9600  
+            # ser = serial.Serial(stringport,baud)
+            print("Connecting to rpi : ")
 
-        
-          
-         
             time.sleep(1)
-            ser.flushInput()
+            # ser.flushInput()
             commande = "RP\n"
 
-            ser.write(commande.encode())
-           
-            response = str(ser.readline().strip(),'utf-8')
+            response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
 
     
             print("POS : " + response)
-            ser.flushInput()
+            # ser.flushInput()
             time.sleep(.2)
             return True
 
@@ -199,17 +197,17 @@ class ComRobot:
         ROBOT_MOVING = False
         print_message('Waiting for welcome message...')
      
-def setCom2():
-    try:
-        global ser2
-        port = "COM4"
-        baud = 115200
-        ser2 = serial.Serial(port, baud,timeout = 5 )
-        print("Connecting to IO port : " + port)
+# def setCom2():
+#     try:
+#         global ser2
+#         port = "COM4"
+#         baud = 115200
+#         ser2 = serial.Serial(port, baud,timeout = 5 )
+#         print("Connecting to IO port : " + port)
 
-    except ConnectionRefusedError as e:
-        print_message(str(e))
-        return False
+#     except ConnectionRefusedError as e:
+#         print_message(str(e))
+#         return False
         
 
 
@@ -368,7 +366,6 @@ def RobotConnect():
     global ROBOT
     global ROBOT_IP
     global ROBOT_PORT
-    setCom2()
     return ROBOT.connect(ROBOT_IP, ROBOT_PORT)
 
 
@@ -528,12 +525,12 @@ def RunCommand(cmd_line):
 
     def getjoint():
         time.sleep(.1)
-        ser.flushInput()
+        # ser.flushInput()
         commande = "RP\n"
 
-        ser.write(commande.encode())
+        
 
-        response = str(ser.readline().strip(),'utf-8')
+        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
         J1AngIndex = response.find('A');
         J2AngIndex = response.find('B');
         J3AngIndex = response.find('C');
@@ -549,7 +546,7 @@ def RunCommand(cmd_line):
         J5AngCur = float(response[J5AngIndex+1:J6AngIndex].strip());
         J6AngCur = float(response[J6AngIndex+1:XposIndex].strip());
     
-        ser.flushInput()
+        # ser.flushInput()
 
         jointList = [J1AngCur,J2AngCur,J3AngCur,J4AngCur,J5AngCur,J6AngCur]
 
@@ -572,19 +569,19 @@ def RunCommand(cmd_line):
         cmd_values= [float(val) for val in cmd_values]
         UpdateStatus(ROBOTCOM_WORKING)
         time.sleep(.1)
-        ser.flushInput()
+        # ser.flushInput()
         commande = "RJA" + str(cmd_values[0]) + "B" + str(cmd_values[1]) + "C" + str(cmd_values[2]) + "D" + str(cmd_values[3]) + "E" + str(cmd_values[4]) + "F" + str(cmd_values[5]) + "G0.00Sp"+ str(ROBOT_JOINT_SPEED) +"Ac" + str(ROBOT_ACCEL)+ "Dc" + str(ROBOT_ACCEL)+ "Rm"+ str(ROBOT_RAMP) +"WN\n"
         print(commande)
 
-        ser.write(commande.encode())
+        # ser.write(commande.encode())
         UpdateStatus(ROBOTCOM_WORKING)
-        ser.flushInput()
+        # ser.flushInput()
 
-        response = str(ser.readline().strip(),'utf-8')
+        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
 
         if "A" in response:
             time.sleep(.1)
-            ser.flushInput()
+            # ser.flushInput()
             UpdateStatus(ROBOTCOM_READY)
 
 
@@ -592,22 +589,22 @@ def RunCommand(cmd_line):
     elif n_cmd_values >= nDOFs_MIN and cmd_line.startswith("MOVL"):
 
         time.sleep(.1)
-        ser.flushInput()
+        # ser.flushInput()
 
         commande = "MLX" + str(cmd_values[6]) + "Y" + str(cmd_values[7]) + "Z" + str(cmd_values[8]) + "Rz" + str(cmd_values[9]) + "Ry" + str(cmd_values[10]) + "Rx" + str(cmd_values[11]) + "Tr0.0Sm"+ str(ROBOT_SPEED) +"Ac" + str(ROBOT_ACCEL)+ "Dc" + str(ROBOT_ACCEL)+ "Rm"+ str(ROBOT_RAMP) +"WN\n"
         print(commande)
      
 
-        ser.write(commande.encode())
+        # ser.write(commande.encode())
         UpdateStatus(ROBOTCOM_WORKING)
         time.sleep(.1)
-        ser.flushInput()
+        # ser.flushInput()
 
-        response = str(ser.readline().strip(),'utf-8')
+        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
 
         if "A" in response:
             time.sleep(.1)
-            ser.flushInput()
+            # ser.flushInput()
             UpdateStatus(ROBOTCOM_READY)
 
 
@@ -632,12 +629,12 @@ def RunCommand(cmd_line):
 
         # get current cartesian position
         time.sleep(.1)
-        ser.flushInput()
+        # ser.flushInput()
         commande = "RP\n"
 
-        ser.write(commande.encode())
+        # ser.write(commande.encode())
 
-        response = str(ser.readline().strip(),'utf-8')
+        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
         XposIndex = response.find('G');
         YposIndex = response.find('H');
         ZposIndex = response.find('I');
@@ -655,28 +652,28 @@ def RunCommand(cmd_line):
         XrotIndex = float(response[XrotIndex+1:MposIndex].strip());
         
         time.sleep(.1)
-        ser.flushInput()
+        # ser.flushInput()
       
         startpos = "X" + str(XposIndex) + "Y" + str(YposIndex) + "Z" + str(ZposIndex) + "Rz" + str(cmd_values[-3]) + "Ry" + str(cmd_values[-2]) + "Rx" + str(cmd_values[-1])
         midpos = "Mx" + str(cmd_values[-12]) + "My" + str(cmd_values[-11]) + "Mz" + str(cmd_values[-10])
         endpos = "Ex" + str(cmd_values[-6]) + "Ey" + str(cmd_values[-5]) + "Ez" + str(cmd_values[-4])
 
         commande = "MA" + startpos + midpos + endpos + "Tr0.0Sm"+ str(ROBOT_SPEED) +"Ac" + str(ROBOT_ACCEL)+ "Dc" + str(ROBOT_ACCEL)+ "Rm"+ str(ROBOT_RAMP) +"WN\n"
-        ser.write(commande.encode())
+        # ser.write(commande.encode())
         UpdateStatus(ROBOTCOM_WORKING)
         time.sleep(.1)
-        ser.flushInput()
+        # ser.flushInput()
 
         print(cmd_values)
         print(commande)
         
-        ser.flushInput()
+        # ser.flushInput()
 
-        response = str(ser.readline().strip(),'utf-8')
+        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
 
         if "A" in response:
             time.sleep(.1)
-            ser.flushInput()
+            # ser.flushInput()
             UpdateStatus(ROBOTCOM_READY)
 
 
@@ -714,7 +711,7 @@ def RunCommand(cmd_line):
 
     elif n_cmd_values >= 6 and cmd_line.startswith("SETTOOL"):
         time.sleep(.1)
-        ser.flushInput()
+        # ser.flushInput()
 
      
         print("test")
@@ -723,11 +720,11 @@ def RunCommand(cmd_line):
         commande = "TF"+"A"+str(cmd_values[0])+"B"+str(cmd_values[1])+"C"+str(cmd_values[2])+"D"+str(cmd_values[3])+"E"+str(cmd_values[4])+"F"+str(cmd_values[5])+"\n"
         print(commande)
 
-        ser.write(commande.encode())
+        # ser.write(commande.encode())
         UpdateStatus(ROBOTCOM_WORKING)
       
 
-        response = str(ser.readline().strip(),'utf-8')
+        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
         
 
         if "Done" in response:
@@ -769,8 +766,8 @@ def RunCommand(cmd_line):
         elif io_value == "0":
             command = F"OFX{io_pin}"+"\n"
         if command:
-            ser2.write(command.encode())
-            ser2.flushInput() 
+            send_message(client_socket,("io:"+command).encode()) 
+            # ser2.flushInput() 
             print_message(cmd_line.strip()[-2])
             UpdateStatus(ROBOTCOM_READY)
 
@@ -803,11 +800,11 @@ def RunCommand(cmd_line):
             print_message(command)
         
         if command:                                             #send commands to arduino io board
-            ser2.write(command.encode())
-            ser2.flushInput()
+            # ser2.write(command.encode())
+            # ser2.flushInput()
             time.sleep(.2)
             print_message("waiting for response")
-            response =  ser2.read()
+            response =  send_message(client_socket,("io:"+command).encode())
             
             if response:                                       #if response before timeout 
                 print_message(f"io response succesful")
@@ -846,7 +843,7 @@ def RunCommand(cmd_line):
 
         if message.strip() == "home":
             print_message("homing robot")
-            HomeRobot(ser)   
+            HomeRobot()   
 
         UpdateStatus(ROBOTCOM_READY)
 
@@ -876,7 +873,7 @@ def RunCommand(cmd_line):
     # Stop monitoring feedback
     ROBOT_MOVING = False
 
-def HomeRobot(ser):
+def HomeRobot(ser=None):
     commandslist = [
         "LLA1B0C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N30.005O10.5P0Q0R0" + "\n",                                                    #offset values should be parameterized sometime in the future
         "LLA0B1C0D0E0F0G0H0I0" +"J0K-3.96L0M1.334N30.005O10.5P0Q0R0" + "\n",
@@ -891,9 +888,9 @@ def HomeRobot(ser):
         attempts = 3
         attempts_left = attempts
         while attempts_left > 0:
-            ser.write(command.encode())
-            ser.flushInput()
-            response = str(ser.readline().strip(), 'utf-8')
+            # ser.write(command.encode())
+            # ser.flushInput()
+            response = str(send_message(client_socket,command.encode()).strip(), 'utf-8')
             if response[:1] == 'A':
                 message = f"J{joint_number+1} Calibrated Successfully"
                 print_message(message)
