@@ -15,7 +15,10 @@ def connect_to_server():
     return client_socket
 
 def send_message(client_socket, message):
-    client_socket.send(message.encode())
+    if isinstance(message, bytes): # if message is bytes, send it as is
+        client_socket.send(message)
+    else:
+        client_socket.send(message.encode())
     data = client_socket.recv(1024).decode()
     print('Received from server: ' + data)
     return data

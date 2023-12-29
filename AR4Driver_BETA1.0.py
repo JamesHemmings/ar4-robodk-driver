@@ -181,7 +181,7 @@ class ComRobot:
             # ser.flushInput()
             commande = "RP\n"
 
-            response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
+            response = send_message(client_socket,commande.encode()).strip()
 
     
             print("POS : " + response)
@@ -530,7 +530,7 @@ def RunCommand(cmd_line):
 
         
 
-        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
+        response = send_message(client_socket,commande.encode()).strip()
         J1AngIndex = response.find('A');
         J2AngIndex = response.find('B');
         J3AngIndex = response.find('C');
@@ -577,7 +577,7 @@ def RunCommand(cmd_line):
         UpdateStatus(ROBOTCOM_WORKING)
         # ser.flushInput()
 
-        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
+        response = send_message(client_socket,commande.encode()).strip()
 
         if "A" in response:
             time.sleep(.1)
@@ -600,7 +600,7 @@ def RunCommand(cmd_line):
         time.sleep(.1)
         # ser.flushInput()
 
-        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
+        response = send_message(client_socket,commande.encode()).strip()
 
         if "A" in response:
             time.sleep(.1)
@@ -634,7 +634,7 @@ def RunCommand(cmd_line):
 
         # ser.write(commande.encode())
 
-        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
+        response = send_message(client_socket,commande.encode()).strip()
         XposIndex = response.find('G');
         YposIndex = response.find('H');
         ZposIndex = response.find('I');
@@ -669,7 +669,7 @@ def RunCommand(cmd_line):
         
         # ser.flushInput()
 
-        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
+        response = send_message(client_socket,commande.encode()).strip()
 
         if "A" in response:
             time.sleep(.1)
@@ -724,7 +724,7 @@ def RunCommand(cmd_line):
         UpdateStatus(ROBOTCOM_WORKING)
       
 
-        response = str(send_message(client_socket,commande.encode()).strip(),'utf-8')
+        response = send_message(client_socket,commande.encode()).strip()
         
 
         if "Done" in response:
@@ -890,7 +890,7 @@ def HomeRobot(ser=None):
         while attempts_left > 0:
             # ser.write(command.encode())
             # ser.flushInput()
-            response = str(send_message(client_socket,command.encode()).strip(), 'utf-8')
+            response = send_message(client_socket,command.encode()).strip()
             if response[:1] == 'A':
                 message = f"J{joint_number+1} Calibrated Successfully"
                 print_message(message)
